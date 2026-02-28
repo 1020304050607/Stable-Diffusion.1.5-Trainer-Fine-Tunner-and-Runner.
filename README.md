@@ -38,4 +38,4 @@ janky stuff i know about
 if you make something cool, cursed, or straight-up weird with it, drop it here or dm me, i wanna see.  
 if it explodes just tell me what broke and i'll probably fix it eventually.(Side note this ran 51k images on 16k steps with another 51k captions in just 6 hours i believe idk i feel asleep)
 
-— d
+— me
