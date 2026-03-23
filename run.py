@@ -1,8 +1,3 @@
-"""
-SD LoRA Trainer  -  Full Pipeline Suite
-Resize  Caption  Train  Fine-Tune  Generate  Face Edit  Image Edit
-"""
-
 import os, sys, subprocess, shutil, re, time, json, glob, struct
 import threading, warnings, logging
 from pathlib import Path
@@ -140,7 +135,6 @@ def boot():
 
 boot()
 
-#imports
 import torch
 import torch.nn.functional as F
 from tqdm import tqdm
@@ -178,7 +172,6 @@ VEXT = ["mp4","mov","avi","mkv","webm"]
 MAX_VFRAMES = 10
 
 
-#gpu helpers
 def gpu_gb():
     if not torch.cuda.is_available(): return 0.0
     return torch.cuda.get_device_properties(0).total_memory / 1024**3
@@ -197,7 +190,6 @@ def gpu_used():
     return (gpu_gb() - torch.cuda.mem_get_info()[0]/1024**3)
 
 
-#model type detection
 _PROFILES = {
     "sd1":  dict(label="SD 1.x  (512px native)",   native=512,  min_res=512,  max_res=768,
                  safe_rank=128, min_rank=4, safe_bs=2, min_bs=1, te_min_rank=4,  flux=False,
@@ -253,13 +245,12 @@ def detect_from_id(model_id):
     return _PROFILES["sd1"].copy()
 
 
-#vram presets
 def vram_preset(prof=None):
     gb = gpu_gb()
     p  = prof or _DEFAULT
     nr = p["native"]
     mr = p["min_res"]
-    def cr(r): return max(r, mr)  # clamp to model minimum
+    def cr(r): return max(r, mr) 
 
     if gb >= 20:
         return dict(res=cr(nr),   bs=4, ga=4,  rank=p["safe_rank"], alpha=p["safe_rank"]*2,
@@ -310,7 +301,6 @@ def show_vram_table():
         print("  " + clr("your card: " + str(round(gb,1)) + "GB  -> auto-filling for: " + p["label"], Y))
 
 
-#header
 def print_header():
     clear()
     print(clr("=" * 60, C))
@@ -321,7 +311,6 @@ def print_header():
         print("  " + clr("VRAM ", DIM) + gpu_bar())
     print()
 
-#resize
 def run_resize(cfg):
     sec("Resize Images and Videos")
     td  = cfg["data_dir"]
@@ -390,7 +379,6 @@ def run_resize(cfg):
                       "videos " + str(vok) + " ok " + str(vfail) + " failed", G) + "\n")
 
 
-#caption
 def run_caption(cfg):
     sec("Auto Caption")
     from transformers import (BlipProcessor, BlipForConditionalGeneration,
@@ -457,7 +445,6 @@ def run_caption(cfg):
                         "  avg " + str(round(elapsed/max(len(media),1),2)) + "s each", G) + "\n")
 
 
-#image edit
 def terminal_image_editor(cfg=None):
     """
     Pure terminal image editing suite.
@@ -737,7 +724,6 @@ def terminal_image_editor(cfg=None):
             pause()
 
 
-#datasets
 class LatentCacheDataset(Dataset):
     def __init__(self, folder, tok, vae, res, ckd):
         self.tok       = tok
@@ -837,7 +823,6 @@ class ImageCaptionDataset(Dataset):
         return img, tok.input_ids[0]
 
 
-#checkpoint helpers
 def find_latest(folder):
     hits = []
     for pat in ["step_*.pt","step_*.safetensors"]:
